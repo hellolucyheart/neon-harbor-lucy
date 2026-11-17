@@ -1,41 +1,80 @@
-// Neon Harbor dev server: serves game/ as static files on http://localhost:8080.
+// Neon Harbor — tiny static file server for local play-testing.
+// Serves game/ on http://localhost:8080 (or --port <n>). Development
+// convenience only: it refuses every path that escapes game/ and sends the
+// MIME types a browser game needs. Node 22, standard library only.
+
+import { createReadStream, statSync } from 'node:fs';
 import { createServer } from 'node:http';
-import { readFileSync, existsSync, statSync } from 'node:fs';
-import { join, resolve, extname } from 'node:path';
+import { extname, join, normalize, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = resolve(import.meta.dirname, 'game');
-const port = Number(process.env.PORT ?? 8080);
+const gameRoot = resolve(fileURLToPath(new URL('./game', import.meta.url)));
+const flagIndex = process.argv.indexOf('--port');
+const wanted = flagIndex === -1 ? 8080 : Number(process.argv[flagIndex + 1]);
+const port = Number.isInteger(wanted) && wanted > 0 && wanted < 65536 ? wanted : 8080;
 
-const types = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.mjs': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-};
+function mimeFor(file) {
+  const table = {
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'text/javascript; charset=utf-8',
+    '.mjs': 'text/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.webp': 'image/webp',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.woff2': 'font/woff2',
+    '.wasm': 'application/wasm',
+    '.wav': 'audio/wav',
+    '.mp3': 'audio/mpeg',
+    '.ogg': 'audio/ogg',
+    '.txt': 'text/plain; charset=utf-8',
+  };
+  return table[extname(file).toLowerCase()] ?? 'application/octet-stream';
+}
 
-const server = createServer((req, res) => {
+function resolveInside(requestPath) {
+  let pathname = requestPath;
+  if (pathname.endsWith('/')) pathname += 'index.html';
+  const file = resolve(join(gameRoot, normalize(pathname)));
+  if (file !== gameRoot && !file.startsWith(gameRoot + sep)) return null;
+  return file;
+}
+
+const server = createServer((request, response) => {
+  let pathname;
   try {
-    const url = new URL(req.url ?? '/', 'http://localhost');
-    let path = decodeURIComponent(url.pathname);
-    if (path === '/') path = '/index.html';
-    const file = join(root, path);
-    if (!file.startsWith(root) || !existsSync(file) || !statSync(file).isFile()) {
-      res.writeHead(404, { 'content-type': 'text/plain' });
-      res.end('not found\n');
-      return;
-    }
-    res.writeHead(200, { 'content-type': types[extname(file)] ?? 'application/octet-stream' });
-    res.end(readFileSync(file));
-  } catch (err) {
-    res.writeHead(500, { 'content-type': 'text/plain' });
-    res.end(`server error: ${err.message}\n`);
+    pathname = decodeURIComponent(new URL(request.url ?? '/', 'http://localhost').pathname);
+  } catch {
+    response.writeHead(400).end('bad request');
+    return;
   }
+  const file = resolveInside(pathname);
+  if (!file) {
+    response.writeHead(403).end('forbidden');
+    return;
+  }
+  let size;
+  try {
+    const stats = statSync(file);
+    if (!stats.isFile()) throw new Error('not a file');
+    size = stats.size;
+  } catch {
+    response.writeHead(404).end('not found');
+    return;
+  }
+  response.writeHead(200, {
+    'content-type': mimeFor(file),
+    'content-length': size,
+    'cache-control': 'no-store',
+  });
+  createReadStream(file).pipe(response);
 });
 
-server.listen(port, () => {
-  console.log(`Neon Harbor serving game/ at http://localhost:${port}`);
+server.listen(port, '127.0.0.1', () => {
+  console.log(`Neon Harbor game/ is on http://localhost:${port}`);
 });

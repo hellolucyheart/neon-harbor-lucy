@@ -1,47 +1,58 @@
-# neon-harbor-lucy
-[![make.fun · gta6-01](https://make.fun/badge/gta6-01.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
-[![rank](https://make.fun/badge/gta6-01/hellolucyheart/neon-harbor-lucy/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
-[![reward](https://make.fun/badge/gta6-01/hellolucyheart/neon-harbor-lucy/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
+# Neon Harbor — Open-World Crime
 
-**Neon Harbor** is an original open-world crime game for make.fun's gta6-01 bounty,
-built with Three.js and plain static files — no build step, no network requests.
+[![make.fun gta6-01](https://make.fun/badge/gta6-01.svg)](https://make.fun/bounty/gta6-01)
+[![rank](https://make.fun/badge/gta6-01/hellolucyheart/neon-harbor-lucy/rank.svg)](https://make.fun/bounty/gta6-01)
+[![reward](https://make.fun/badge/gta6-01/hellolucyheart/neon-harbor-lucy/reward.svg)](https://make.fun/bounty/gta6-01)
 
-You play **Rico Vane**, a wheelman in the sun-soaked port city of Marisol Bay.
-Steal a car, outrun Harbor PD, settle a debt at the old cannery warehouse, and
-vanish before the heat closes in. The city is procedural and deterministic: a
-10×10 street grid of lit towers, neon signs, palm trees and a marina, with
-traffic cruising the avenues and pedestrians scattering when trouble arrives.
+An original open-world crime game for the make.fun **gta6-01 "Make GTA 6"** bounty. Built with Three.js, playable offline in a desktop browser from static files — no network requests, no build step.
 
-## Features
+You are **Lena**, a courier with fast wheels and faster debts, new in **Neon Harbor** — a sun-soaked port city of neon avenues, a working pier, and Harbor PD cruisers that never sleep. Riko, a fixer on Pier 9, has four jobs for you. Take them, and the harbor is yours.
 
-- Open world on foot and by car — steal any car, drive arcade-style, handbrake turns
-- Wanted system (0–5 stars) with Harbor PD pursuit cars that ram and bust you
-- 3 story missions with a HUD tracker, beacon marker and cash rewards
-- On-foot combat: hitscan shooting, tracers, muzzle flash, thugs who shoot back
-- HUD with health, cash, wanted stars, speed, objective and a live circular minimap
-- Title, pause, busted, game-over and story-complete screens
-- Autosave to localStorage (cash, mission, position, wanted level) with Continue
-- Synthesized WebAudio sound only — engine hum, sirens, gunshots, bassline loop
+## Play
 
-## Controls
-
-| Input | Action |
-| --- | --- |
-| W A S D | Move / drive |
-| Mouse drag | Look around |
-| E | Steal / enter car, exit car |
-| Click | Shoot (on foot) |
-| Shift | Run |
-| Space | Handbrake |
-| Esc | Pause |
-
-## Run it
+Serve the game and open it in a desktop browser:
 
 ```sh
 node serve.ts
+# then open http://localhost:8080
 ```
 
-Then open http://localhost:8080 in a desktop browser.
+## What is in the game
 
-All characters, places, vehicles, names, story, art and music are original —
-nothing from any commercial game.
+- **A city to explore** — a seeded neon harbor city: street grid, towers with lit windows, rooftop neon signs, a park, a plaza fountain, the pier and the water.
+- **On foot and by car** — walk, run, steal any parked or driven car (E), arcade driving with a chase camera.
+- **Traffic and pedestrians** — NPC cars loop the avenues and slow for the car ahead; pedestrians stroll the sidewalks and flee from speeding cars.
+- **Wanted level and police** — 1–5 stars. Cruisers chase, ram, and bust you on foot. Break line of sight and the heat fades.
+- **Missions and a story** — four jobs for Riko: a meet at the pier, a car boost for the garage, a getaway from a 3-star chase, and a turf war with the Redline crew for a gold case. Cash rewards, dialog, and a mission beacon.
+- **Combat** — punch (F / click) and shoot (right-click) with tracers, impact sparks, and rivals who fight back.
+- **HUD and minimap** — health, cash, wanted stars, clock, speed, mission objective, story dialogs, and a live minimap with traffic, cruisers, rivals, and the mission marker.
+- **Start screen and save** — New Game / Continue, pause menu, and localStorage saves (cash, mission, position, clock).
+- **Sound** — synthesized WebAudio only: engine hum, two-tone sirens, gunshots, thuds, and mission jingles. No audio files.
+
+## Controls
+
+| Key | Action |
+| --- | --- |
+| WASD / arrows | Move / drive |
+| Shift | Run |
+| E | Enter or steal a car / get out |
+| F or left-click | Punch |
+| Right-click | Shoot |
+| Mouse drag | Look around |
+| Esc | Pause |
+
+## Structure
+
+`game/` holds the playable game. `game/src/` splits it into one clear job per file: `entry` (boot + loop), `city` (world), `walker` / `driver` (movement), `traffic` / `pedestrian` (crowds), `patrol` / `wanted` (the law), `quests` (missions), `fight` (combat), `display` / `radar` (HUD + minimap), `tunes` (sound), `vault` (save), `spark` (particles), `chasecam` (camera), `staging` (screenshot poses), plus `seedling`, `state`, and `controls`. Three.js is vendored under `game/vendor/three/`.
+
+`main.ts` copies `game/` and `screenshots/` to the output directory and writes `dossier.json` with the kit's `vendor/makefun-game.ts`:
+
+```sh
+mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+```
+
+Screenshots in `screenshots/` are real renders of the game, taken with `?shot=chase|drive|mission|start&seed=7` (see `shots.json`).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
