@@ -649,4 +649,5 @@ export class Game {
 }
 
 const game = new Game();
+window.NEON_HARBOR = game;
 game.start();
