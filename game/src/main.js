@@ -348,11 +348,20 @@ export class Game {
 
   shoot() {
     if (!this.player.onFoot || this.mode !== 'playing') return;
-    const dir = new THREE.Vector3();
-    this.render.camera.getWorldDirection(dir);
+    if (this.combat.fireCooldown > 0) return; // still cooling down: no shot fired
+    // Aim along the camera's yaw at chest height. Firing along the camera's
+    // full view direction dives into the ground before it reaches a thug
+    // more than a few metres away (the chase camera looks down at the
+    // player), so distant thugs could never be hit.
+    const dir = new THREE.Vector3(
+      Math.sin(this.render.camYaw),
+      0,
+      Math.cos(this.render.camYaw),
+    );
     const from = new THREE.Vector3(this.player.pos.x, this.player.pos.y + 1.5, this.player.pos.z);
     const hit = this.combat.fire(from, dir, this.thugs, 60);
     this.audio.shot();
+    this.addHeat(WANTED.shoot);
     if (hit) {
       this.hud.hitmarker();
       const died = hit.damage(34);

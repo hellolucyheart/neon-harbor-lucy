@@ -5,6 +5,8 @@
 import { Car, makeCarMesh } from './vehicles.js';
 import { POLICE, CITY } from './config.js';
 
+const POLICE_PAINT = 0x1c2733;
+
 export class PoliceCar extends Car {
   constructor(scene, x, z, heading) {
     super(scene, POLICE_PAINT, x, z, heading, { police: true });
@@ -57,8 +59,6 @@ export class PoliceCar extends Car {
     return false;
   }
 }
-
-const POLICE_PAINT = 0x1c2733;
 
 /** Spawn points on the ring just outside the player's view. */
 export function policeSpawnPoint(playerX, playerZ, rng) {
