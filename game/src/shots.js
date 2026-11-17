@@ -62,6 +62,14 @@ function poseCameraBehind(game, target, heading) {
   game.render.follow(target, 8, 0.5);
 }
 
+/** Front three-quarter view: the car drives toward the camera, so a pursuit behind it stays in frame. */
+function poseCameraFront(game, target, heading) {
+  game.render.camYaw = heading + Math.PI;
+  game.render.camPitch = 0.26;
+  game.render.snapTo(target);
+  game.render.follow(target, 8, 0.5);
+}
+
 /** Stage `name` on the game and leave it frozen for the screenshot. */
 export function stageShot(name, game) {
   const scene = name || 'start';
@@ -78,13 +86,12 @@ export function stageShot(name, game) {
   if (scene === 'chase') {
     setupPlay(game, 0);
     game.money = 1250;
-    game.heat = 65;
-    game.wantedStars = 3;
-    const car = putPlayerInCar(game, 0, -96, 0);
-    // Two patrol cars already closing in, one cutting across ahead.
-    const cop1 = new PoliceCar(game.render.scene, -6, -130, 0.2);
-    const cop2 = new PoliceCar(game.render.scene, 8, -118, -0.15);
-    const cop3 = new PoliceCar(game.render.scene, 2, -40, Math.PI);
+    game.addHeat(65);
+    const car = putPlayerInCar(game, -24, -96, 0);
+    // Three patrol cars already closing in from behind and alongside.
+    const cop1 = new PoliceCar(game.render.scene, -30, -130, 0.2);
+    const cop2 = new PoliceCar(game.render.scene, -18, -118, -0.15);
+    const cop3 = new PoliceCar(game.render.scene, -24, -40, Math.PI);
     game.police.push(cop1, cop2, cop3);
     game.audio.setSiren(false);
     stepGame(game, 5, {
@@ -92,14 +99,14 @@ export function stageShot(name, game) {
       steer: 0,
       steerFn: (g) => streetSteer(g, g.player.car, 'z'),
     });
-    poseCameraBehind(game, car.pos, car.heading);
+    poseCameraFront(game, car.pos, car.heading);
     return;
   }
 
   if (scene === 'drive') {
     setupPlay(game, 1);
     game.money = 420;
-    const car = putPlayerInCar(game, -120, 48, Math.PI / 2);
+    const car = putPlayerInCar(game, -120, 24, Math.PI / 2);
     stepGame(game, 4, {
       throttle: 1,
       steer: 0,
