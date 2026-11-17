@@ -3,34 +3,37 @@
 [![rank](https://make.fun/badge/gta6-01/hellolucyheart/neon-harbor-lucy/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 [![reward](https://make.fun/badge/gta6-01/hellolucyheart/neon-harbor-lucy/reward.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 
-**Neon Harbor** is an original open-world crime game that runs entirely in the browser — no build step, no network, no downloaded assets. Explore a sun-soaked harbor city on foot and by car, steal cars, dodge the Harbor Patrol, run jobs for the fixer Vex, and rebuild Rook's name one loud night at a time.
+**Neon Harbor** is an original open-world crime game for make.fun's gta6-01 bounty,
+built with Three.js and plain static files — no build step, no network requests.
 
-Everything is original: the city, the characters, the vehicles, the story, the art and the synthesized sound. Nothing is taken from any commercial game.
+You play **Rico Vane**, a wheelman in the sun-soaked port city of Marisol Bay.
+Steal a car, outrun Harbor PD, settle a debt at the old cannery warehouse, and
+vanish before the heat closes in. The city is procedural and deterministic: a
+10×10 street grid of lit towers, neon signs, palm trees and a marina, with
+traffic cruising the avenues and pedestrians scattering when trouble arrives.
 
-## What is in the game
+## Features
 
-- **A city to explore** — a grid of streets, tower blocks with lit windows, neon signs, lamps, palms and the sea along the south edge.
-- **On foot and by car** — walk, run, steal any parked or cruising car (E), drive with arcade physics and a chase camera.
-- **Traffic and pedestrians** — cars cruise the street grid and turn at intersections; pedestrians stroll the sidewalks and scatter from a speeding car.
-- **Wanted level and police** — stealing cars, hitting pedestrians and shooting raise your heat. Harbor Patrol cars spawn, pursue, ram and bust you when they corner you slow.
-- **Missions and a story** — three jobs for Rook: *First Wheels* (steal a car and reach the marina), *The Harbor Drop* (pick up a crate, dodge the dock thugs, deliver it across town), and *Shake the Heat* (lose a three-star wanted level and meet Vex at the pier). Each pays cash.
-- **Combat** — a hitscan pistol with tracer and muzzle flash; dock thugs shoot back and drop cash.
-- **HUD with minimap** — health, money, wanted stars, speed, mission objective with timer, message feed, and a live 2D minimap with player, traffic, police, thug and beacon markers.
-- **Start, pause, busted, game-over and mission-complete screens**, plus street-cash pickups and a synthesized WebAudio soundscape: engine hum, two-tone sirens, gunshots, pickups and a neon-noir bassline — no audio files.
-- **Save** — progress (money, story, health, position) saves to localStorage automatically and can be continued from the title screen.
+- Open world on foot and by car — steal any car, drive arcade-style, handbrake turns
+- Wanted system (0–5 stars) with Harbor PD pursuit cars that ram and bust you
+- 3 story missions with a HUD tracker, beacon marker and cash rewards
+- On-foot combat: hitscan shooting, tracers, muzzle flash, thugs who shoot back
+- HUD with health, cash, wanted stars, speed, objective and a live circular minimap
+- Title, pause, busted, game-over and story-complete screens
+- Autosave to localStorage (cash, mission, position, wanted level) with Continue
+- Synthesized WebAudio sound only — engine hum, sirens, gunshots, bassline loop
 
 ## Controls
 
-| Key | Action |
+| Input | Action |
 | --- | --- |
 | W A S D | Move / drive |
+| Mouse drag | Look around |
+| E | Steal / enter car, exit car |
+| Click | Shoot (on foot) |
 | Shift | Run |
-| Mouse / ← → | Look around |
-| E | Steal car / exit car |
-| Click / F | Shoot |
-| Space | Brake |
+| Space | Handbrake |
 | Esc | Pause |
-| M | Mute |
 
 ## Run it
 
@@ -38,4 +41,7 @@ Everything is original: the city, the characters, the vehicles, the story, the a
 node serve.ts
 ```
 
-Then open http://localhost:8080 in a desktop browser. Node 22.18 or later is all you need; the game is static files under `game/` and Three.js is vendored under `game/vendor/three/`.
+Then open http://localhost:8080 in a desktop browser.
+
+All characters, places, vehicles, names, story, art and music are original —
+nothing from any commercial game.

@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -6,155 +6,121 @@
 <title>Neon Harbor — an open-world crime game</title>
 <link rel="icon" href="data:,">
 <style>
-  :root {
-    --ink: #f4f1ea; --muted: #b9c2cc; --neon: #ff2e88; --cyan: #22d3ee;
-    --gold: #facc15; --panel: rgba(10, 16, 28, 0.82); --line: rgba(255, 255, 255, 0.16);
-    --font-ui: system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-num: ui-monospace, 'SF Mono', Menlo, monospace;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; overflow: hidden; background: #0a101c; color: var(--ink); font-family: var(--font-ui); }
-  #game, #game canvas { position: fixed; inset: 0; display: block; }
-  #hud { position: fixed; inset: 0; pointer-events: none; }
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b1026; font-family: "Segoe UI", Arial, sans-serif; }
+  #scene { position: fixed; inset: 0; display: block; }
+  .overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 20; }
+  .panel { background: rgba(8, 12, 34, 0.88); border: 2px solid #ff2e88; border-radius: 14px; padding: 28px 34px; color: #f2f6ff; text-align: center; max-width: 560px; box-shadow: 0 0 40px rgba(255, 46, 136, 0.45); }
+  .panel h1 { margin: 0 0 4px; font-size: 44px; letter-spacing: 2px; color: #ff2e88; text-shadow: 0 0 18px #ff2e88; }
+  .panel h2 { margin: 0 0 10px; font-size: 26px; color: #37e0ff; }
+  .panel p { margin: 8px 0; font-size: 15px; line-height: 1.5; color: #cdd8f5; }
+  .panel .sub { color: #ffd166; font-weight: bold; }
+  .btn { display: inline-block; margin-top: 14px; padding: 12px 34px; font-size: 19px; font-weight: bold; color: #0b1026; background: #37e0ff; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 0 18px rgba(55, 224, 255, 0.7); }
+  .btn:hover { background: #7df0ff; }
+  .btn.pink { background: #ff2e88; color: #fff; box-shadow: 0 0 18px rgba(255, 46, 136, 0.7); }
+  .keys { text-align: left; display: inline-block; margin-top: 6px; font-size: 14px; line-height: 1.7; }
   .hidden { display: none !important; }
-
-  #minimap { position: fixed; left: 18px; top: 18px; width: 180px; height: 180px; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 4px 18px rgba(0,0,0,0.5); }
-  #objective { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); max-width: 560px; text-align: center; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 16px; }
-  #objective-text { font-size: 14px; font-weight: 600; }
-  #timer { font-family: var(--font-num); font-size: 15px; color: var(--gold); margin-top: 2px; }
-  #money { position: fixed; right: 18px; top: 16px; text-align: right; font-family: var(--font-num); font-size: 22px; color: var(--gold); text-shadow: 0 1px 4px #000; }
-  #stars { position: fixed; right: 18px; top: 54px; text-align: right; font-size: 26px; letter-spacing: 4px; text-shadow: 0 0 12px rgba(255, 60, 60, 0.7); }
-  #stars.flash { animation: starflash 0.5s ease; }
-  @keyframes starflash { 0% { transform: scale(1.6); } 100% { transform: scale(1); } }
-  #feed { position: fixed; right: 18px; top: 108px; text-align: right; font-size: 13px; line-height: 1.6; text-shadow: 0 1px 4px #000; max-width: 340px; }
-  #feed div:first-child { color: #fff; font-weight: 600; }
-
-  #vitals { position: fixed; left: 22px; bottom: 22px; width: 240px; }
-  #health-num { font-family: var(--font-num); font-size: 42px; line-height: 1; text-shadow: 0 2px 8px #000; }
-  #health-bar-wrap { height: 7px; background: rgba(255,255,255,0.14); border-radius: 4px; margin-top: 8px; overflow: hidden; }
-  #health-bar { height: 100%; width: 100%; background: #7ddc8a; }
-  #health-label { font-size: 11px; letter-spacing: 0.2em; color: var(--muted); margin-top: 4px; }
-  #speed { position: fixed; right: 26px; bottom: 20px; text-align: right; }
-  #speed-num { font-family: var(--font-num); font-size: 52px; line-height: 1; text-shadow: 0 2px 8px #000; }
-  #speed-unit { font-size: 13px; color: var(--muted); }
-  #hint { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); font-size: 12px; color: var(--muted); text-shadow: 0 1px 3px #000; white-space: nowrap; }
-  #save-note { position: fixed; left: 22px; bottom: 96px; font-size: 11px; color: var(--muted); }
-
-  #crosshair { position: fixed; left: 50%; top: 50%; width: 0; height: 0; }
-  #crosshair i { position: absolute; background: var(--ink); box-shadow: 0 0 3px #000; }
-  #crosshair i:nth-child(1) { left: -1px; top: -14px; width: 2px; height: 8px; }
-  #crosshair i:nth-child(2) { left: -1px; top: 6px; width: 2px; height: 8px; }
-  #crosshair i:nth-child(3) { top: -1px; left: -14px; height: 2px; width: 8px; }
-  #crosshair i:nth-child(4) { top: -1px; left: 6px; height: 2px; width: 8px; }
-  #hitmarker { position: fixed; left: 50%; top: 50%; width: 26px; height: 26px; transform: translate(-50%, -50%) rotate(45deg); opacity: 0; }
-  #hitmarker.on { opacity: 1; }
-  #hitmarker i { position: absolute; background: #ffd9a0; }
-  #hitmarker i:nth-child(1) { left: 12px; top: 0; width: 2px; height: 8px; }
-  #hitmarker i:nth-child(2) { left: 12px; bottom: 0; width: 2px; height: 8px; }
-  #hitmarker i:nth-child(3) { top: 12px; left: 0; height: 2px; width: 8px; }
-  #hitmarker i:nth-child(4) { top: 12px; right: 0; height: 2px; width: 8px; }
-  #damage-flash { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(255, 30, 30, 0.55) 100%); opacity: 0; }
-
-  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(6, 10, 20, 0.72); backdrop-filter: blur(3px); z-index: 10; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 32px 40px; max-width: 620px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
-  .card h1 { margin: 0 0 4px; font-size: 54px; letter-spacing: 0.04em; background: linear-gradient(90deg, var(--neon), var(--gold), var(--cyan)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .card h2 { margin: 0 0 10px; font-size: 34px; letter-spacing: 0.04em; }
-  .card .sub { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 10px 0 18px; }
-  .card .controls { text-align: left; font-size: 13px; line-height: 1.9; color: var(--ink); background: rgba(255,255,255,0.05); border-radius: 8px; padding: 12px 18px; margin: 0 0 20px; }
-  .card .controls b { color: var(--gold); font-family: var(--font-num); }
-  .btn { display: inline-block; pointer-events: auto; cursor: pointer; border: none; border-radius: 8px; padding: 13px 30px; font-size: 16px; font-weight: 700; color: #101018; background: linear-gradient(90deg, var(--neon), var(--gold)); margin: 4px; }
-  .btn.ghost { background: rgba(255,255,255,0.12); color: var(--ink); border: 1px solid var(--line); }
-  .btn:hover { filter: brightness(1.12); }
-  #mission-reward { font-family: var(--font-num); font-size: 20px; color: var(--gold); margin-top: 8px; }
-  .title-tag { font-size: 12px; letter-spacing: 0.34em; color: var(--cyan); margin-bottom: 8px; }
-  #mute-note { font-size: 11px; color: var(--muted); margin-top: 14px; }
+  #hud { position: fixed; inset: 0; pointer-events: none; z-index: 10; color: #fff; }
+  #topbar { position: absolute; top: 12px; left: 14px; right: 14px; display: flex; justify-content: space-between; align-items: flex-start; }
+  #wanted { font-size: 30px; letter-spacing: 4px; color: #ffd166; text-shadow: 0 0 10px rgba(255, 209, 102, 0.9); }
+  #wanted .off { color: rgba(255,255,255,0.25); text-shadow: none; }
+  #money { font-size: 26px; font-weight: bold; color: #7dff9b; text-shadow: 0 2px 6px #000; }
+  #objective { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: rgba(8, 12, 34, 0.8); border: 1px solid #37e0ff; border-radius: 8px; padding: 8px 16px; font-size: 15px; max-width: 46%; text-align: center; }
+  #objective b { color: #ffd166; }
+  #objective .timer { color: #ff8fa3; font-weight: bold; }
+  #vitals { position: absolute; left: 14px; bottom: 14px; width: 240px; }
+  .bar { height: 16px; border: 2px solid #fff; border-radius: 8px; overflow: hidden; background: rgba(0,0,0,0.5); margin-top: 4px; }
+  .bar > div { height: 100%; }
+  #healthfill { background: #37e0ff; width: 100%; }
+  #carfill { background: #ffd166; width: 100%; }
+  #vitals .lbl { font-size: 13px; text-shadow: 0 1px 3px #000; }
+  #speedo { position: absolute; right: 16px; bottom: 14px; font-size: 34px; font-weight: bold; text-shadow: 0 2px 8px #000; text-align: right; }
+  #speedo small { font-size: 14px; display: block; color: #cdd8f5; }
+  #minimap { position: absolute; right: 14px; top: 64px; border: 2px solid rgba(55, 224, 255, 0.8); border-radius: 50%; background: rgba(8, 12, 34, 0.75); box-shadow: 0 0 14px rgba(0,0,0,0.6); }
+  #crosshair { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; }
+  #crosshair::before, #crosshair::after { content: ""; position: absolute; background: #fff; box-shadow: 0 0 4px #000; }
+  #crosshair::before { left: 10px; top: 0; width: 2px; height: 22px; }
+  #crosshair::after { left: 0; top: 10px; width: 22px; height: 2px; }
+  #toast { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); font-size: 30px; font-weight: bold; color: #ffd166; text-shadow: 0 0 16px rgba(255, 209, 102, 0.9), 0 2px 4px #000; text-align: center; }
+  #hint { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); font-size: 14px; background: rgba(0,0,0,0.55); padding: 6px 12px; border-radius: 8px; }
+  #damage { position: fixed; inset: 0; pointer-events: none; z-index: 15; box-shadow: inset 0 0 120px rgba(255, 0, 40, 0.0); transition: box-shadow 0.15s; }
 </style>
 <script type="importmap">
 { "imports": { "three": "./vendor/three/three.module.min.js" } }
 </script>
 </head>
 <body>
-<div id="game"></div>
-<div id="damage-flash"></div>
-
+<canvas id="scene"></canvas>
+<div id="damage"></div>
 <div id="hud" class="hidden">
-  <canvas id="minimap" width="180" height="180"></canvas>
-  <div id="objective"><div id="objective-text"></div><div id="timer" class="hidden"></div></div>
-  <div id="money">$0</div>
-  <div id="stars">☆☆☆☆☆</div>
-  <div id="feed"></div>
+  <div id="topbar">
+    <div id="wanted"></div>
+    <div id="objective"></div>
+    <div id="money">$0</div>
+  </div>
+  <canvas id="minimap" width="170" height="170"></canvas>
   <div id="vitals">
-    <div id="health-num">100</div>
-    <div id="health-bar-wrap"><div id="health-bar"></div></div>
-    <div id="health-label">HEALTH</div>
+    <div class="lbl">HEALTH</div>
+    <div class="bar"><div id="healthfill"></div></div>
+    <div class="lbl" id="carlabel" style="margin-top:6px">CAR</div>
+    <div class="bar"><div id="carfill"></div></div>
   </div>
-  <div id="speed" class="hidden"><span id="speed-num">0</span> <span id="speed-unit">km/h</span></div>
-  <div id="save-note"></div>
+  <div id="speedo">0<small>km/h</small></div>
+  <div id="crosshair" class="hidden"></div>
+  <div id="toast"></div>
   <div id="hint"></div>
-  <div id="crosshair" class="hidden"><i></i><i></i><i></i><i></i></div>
-  <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
 </div>
 
-<div id="screen-title" class="screen">
-  <div class="card">
-    <div class="title-tag">AN OPEN-WORLD CRIME GAME</div>
+<div id="title" class="overlay">
+  <div class="panel">
     <h1>NEON HARBOR</h1>
-    <p class="sub">Neon Harbor never sleeps — it just changes shifts. Rook came back to the docks with empty pockets and a name to rebuild. One stolen car, one loud delivery, one long night away from the patrol. That is the whole plan.</p>
-    <div class="controls">
-      <b>W A S D</b> — move / drive &nbsp;·&nbsp; <b>Shift</b> — run<br>
-      <b>Mouse</b> — look around &nbsp;·&nbsp; <b>E</b> — steal / exit car<br>
-      <b>Click / F</b> — shoot &nbsp;·&nbsp; <b>Space</b> — brake<br>
-      <b>Esc</b> — pause &nbsp;·&nbsp; <b>M</b> — mute
+    <p class="sub">An open-world crime story in the sun-soaked port city of Marisol Bay.</p>
+    <p>You are <b>Rico Vane</b>, a wheelman fresh out of luck. The Marlin crew owns the harbor —
+       steal a ride, settle a debt at the warehouse, and vanish before the Harbor PD boxes you in.</p>
+    <div class="keys">
+      <b>W A S D</b> — move / drive &nbsp;·&nbsp; <b>Mouse drag</b> — look around<br>
+      <b>E</b> — steal / enter car, exit car &nbsp;·&nbsp; <b>Click</b> — shoot (on foot)<br>
+      <b>Shift</b> — run &nbsp;·&nbsp; <b>Space</b> — handbrake &nbsp;·&nbsp; <b>Esc</b> — pause
     </div>
-    <button id="btn-start" class="btn">Start the night</button>
-    <button id="btn-continue" class="btn ghost hidden">Continue</button>
-    <div id="mute-note">Sound is synthesized live — no audio files. Progress saves automatically.</div>
+    <br>
+    <button class="btn" id="startBtn">▶ START ENGINE</button>
+    <button class="btn pink hidden" id="continueBtn">↻ CONTINUE</button>
+    <p style="font-size:12px; margin-top:14px;">Progress saves automatically to this browser. All characters, places and music are original.</p>
   </div>
 </div>
 
-<div id="screen-pause" class="screen hidden">
-  <div class="card">
-    <h2>Paused</h2>
-    <p class="sub">The harbor waits for no one — except right now.</p>
-    <button id="btn-resume" class="btn">Resume</button>
-    <button id="btn-restart" class="btn ghost">Restart story</button>
-    <button id="btn-save-quit" class="btn ghost">Save &amp; quit to title</button>
+<div id="pause" class="overlay hidden">
+  <div class="panel">
+    <h2>PAUSED</h2>
+    <p>Take a breath, Rico. The harbor waits.</p>
+    <button class="btn" id="resumeBtn">RESUME</button>
+    <button class="btn pink" id="restartBtn">RESTART STORY</button>
   </div>
 </div>
 
-<div id="screen-busted" class="screen hidden">
-  <div class="card">
-    <h2>BUSTED</h2>
-    <p class="sub" id="busted-sub">The Harbor Patrol cornered you. They impound the car and take $100 off the top.</p>
-    <button id="btn-busted-retry" class="btn">Back to the streets</button>
+<div id="busted" class="overlay hidden">
+  <div class="panel">
+    <h2 style="color:#ff5b5b">BUSTED!</h2>
+    <p>Harbor PD hauled you in. The crew posts bail — but the heat keeps your cash.</p>
+    <button class="btn" id="bustedBtn">BACK ON THE STREETS</button>
   </div>
 </div>
 
-<div id="screen-over" class="screen hidden">
-  <div class="card">
-    <h2>FLATLINED</h2>
-    <p class="sub" id="over-sub">Rook went down on the docks. The harbor keeps moving without you.</p>
-    <button id="btn-over-retry" class="btn">Get back up</button>
+<div id="gameover" class="overlay hidden">
+  <div class="panel">
+    <h2 style="color:#ff5b5b">FLATLINED</h2>
+    <p>Rico Vane, 24, wheelman. The harbor keeps its secrets.</p>
+    <button class="btn" id="overBtn">TRY AGAIN</button>
   </div>
 </div>
 
-<div id="screen-mission" class="screen hidden">
-  <div class="card">
-    <h2 id="mission-title">Job complete</h2>
-    <div id="mission-reward"></div>
-    <p class="sub">Vex is already lining up the next one.</p>
-    <button id="btn-mission-next" class="btn">Next job</button>
+<div id="complete" class="overlay hidden">
+  <div class="panel">
+    <h2 style="color:#7dff9b">STORY COMPLETE</h2>
+    <p>You slipped the harbor's grip and kept the cash. <b>Neon Harbor</b> is yours, Rico.</p>
+    <button class="btn" id="completeBtn">FREE ROAM</button>
   </div>
 </div>
 
-<div id="screen-story" class="screen hidden">
-  <div class="card">
-    <h2>Neon Harbor</h2>
-    <p class="sub" id="title-story"></p>
-    <button id="btn-story-close" class="btn">Keep roaming</button>
-  </div>
-</div>
-
-<script type="module" src="./src/main.js"></script>
+<script type="module" src="./src/boot.js"></script>
 </body>
 </html>
