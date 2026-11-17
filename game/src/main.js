@@ -239,6 +239,7 @@ export class Game {
       this.hud.feed('The job is still open. ' + this.missions.current.story);
       return;
     }
+    const next = this.missions.missionIndex + 1;
     if (next >= MISSIONS.length) {
       this.storyDone = true;
       this.hud.showStory(STORY.outro);

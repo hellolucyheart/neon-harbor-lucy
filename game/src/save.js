@@ -8,7 +8,7 @@ export function saveGame(state) {
     const data = {
       version: 1,
       money: Math.round(state.money),
-      missionIndex: state.missionIndex,
+      missionIndex: state.missions.missionIndex,
       storyDone: state.storyDone,
       health: Math.round(state.health),
       pos: [state.player.pos.x, state.player.pos.z],
