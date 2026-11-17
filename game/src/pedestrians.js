@@ -76,18 +76,25 @@ export class Pedestrian {
       this.stateTimer = 1.2;
     }
     if (this.state === 'flee') {
-      // Run away from the danger point.
-      const dx = this.pos.x - danger.x;
-      const dz = this.pos.z - danger.z;
-      const d = Math.hypot(dx, dz) || 1;
-      this.heading = Math.atan2(dx / d, dz / d);
-      const speed = 5.2;
-      this.pos.x += Math.sin(this.heading) * speed * dt;
-      this.pos.z += Math.cos(this.heading) * speed * dt;
-      if (this.stateTimer <= 0) {
+      if (!danger) {
+        // The threat is gone: stop running.
         this.fleeing = false;
         this.state = 'walk';
         this.stateTimer = this.rng.range(2, 6);
+      } else {
+        // Run away from the danger point.
+        const dx = this.pos.x - danger.x;
+        const dz = this.pos.z - danger.z;
+        const d = Math.hypot(dx, dz) || 1;
+        this.heading = Math.atan2(dx / d, dz / d);
+        const speed = 5.2;
+        this.pos.x += Math.sin(this.heading) * speed * dt;
+        this.pos.z += Math.cos(this.heading) * speed * dt;
+        if (this.stateTimer <= 0) {
+          this.fleeing = false;
+          this.state = 'walk';
+          this.stateTimer = this.rng.range(2, 6);
+        }
       }
     } else if (this.state === 'walk') {
       if (this.stateTimer <= 0) {
